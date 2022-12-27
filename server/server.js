@@ -1,9 +1,11 @@
-import express from 'express'
-import * as dotenv from 'dotenv'
-import cors from 'cors'
-import { Configuration, OpenAIApi } from 'openai'
+import express from 'express';
+import * as dotenv from 'dotenv';
+import cors from 'cors';
+import { Configuration, OpenAIApi } from 'openai';
 
-dotenv.config()
+dotenv.config();
+
+console.log('env', process.env.OPENAI_API_KEY);
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -11,22 +13,24 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+const app = express();
+app.use(cors());
+app.use(express.json());
 
 app.get('/', async (req, res) => {
   res.status(200).send({
-    message: 'Hello from CodeX!'
-  })
-})
+    message: 'Hello from ChatGPT!',
+  });
+});
 
 app.post('/', async (req, res) => {
   try {
     const prompt = req.body.prompt;
 
+    console.log('prompt', prompt);
+
     const response = await openai.createCompletion({
-      model: "text-davinci-003",
+      model: 'text-davinci-003',
       prompt: `${prompt}`,
       temperature: 0, // Higher values means the model will take more risks.
       max_tokens: 3000, // The maximum number of tokens to generate in the completion. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
@@ -36,13 +40,12 @@ app.post('/', async (req, res) => {
     });
 
     res.status(200).send({
-      bot: response.data.choices[0].text
+      bot: response.data.choices[0].text,
     });
-
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).send(error || 'Something went wrong');
   }
-})
+});
 
-app.listen(5000, () => console.log('AI server started on http://localhost:5000'))
+app.listen(5000, () => console.log('AI server started on http://localhost:5000'));
